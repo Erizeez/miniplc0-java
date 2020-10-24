@@ -80,7 +80,7 @@ public class Tokenizer {
             it.nextChar();
         }
         try{
-            return new Token(TokenType.Uint, tempDigit.toString(), startPos, it.currentPos());
+            return new Token(TokenType.Ident, tempDigit.toString(), startPos, it.currentPos());
         }catch (Exception e){
             throw new TokenizeError(ErrorCode.InvalidInput, startPos);
         }
