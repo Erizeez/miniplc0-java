@@ -223,6 +223,7 @@ public final class Analyser {
 
             // 分号
             expect(TokenType.Semicolon);
+            declareSymbol(nameToken.getValueString(), nameToken.getStartPos());
         }
     }
 
@@ -233,6 +234,7 @@ public final class Analyser {
             expect(TokenType.Equal);
             analyseExpression();
             expect(TokenType.Semicolon);
+            declareSymbol(nameToken.getValueString(), nameToken.getStartPos());
         }
     }
 
@@ -314,11 +316,12 @@ public final class Analyser {
     }
 
     private void analyseAssignmentStatement() throws CompileError {
-        expect(TokenType.Ident);
+        var tempIdent = expect(TokenType.Ident);
+        int offsetTemp = this.getOffset(tempIdent.getValueString(), tempIdent.getStartPos());
         expect(TokenType.Equal);
         analyseExpression();
         expect(TokenType.Semicolon);
-
+        instructions.add(new Instruction(Operation.STO, offsetTemp));
     }
 
     private void analyseOutputStatement() throws CompileError {
@@ -342,9 +345,12 @@ public final class Analyser {
         }
 
         if (check(TokenType.Ident)) {
-            // 调用相应的处理函数
+            var nameToken = expect(TokenType.Ident);
+            int offsetTemp = this.getOffset(nameToken.getValueString(), nameToken.getStartPos());
+            instructions.add(new Instruction(Operation.LOD, offsetTemp));
         } else if (check(TokenType.Uint)) {
-            // 调用相应的处理函数
+            var nameToken = expect(TokenType.Uint);
+            instructions.add(new Instruction(Operation.LIT, (Integer) nameToken.getValue()));
         } else if (check(TokenType.LParen)) {
             expect(TokenType.LParen);
             analyseExpression();

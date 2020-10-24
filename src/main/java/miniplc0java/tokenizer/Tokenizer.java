@@ -80,7 +80,19 @@ public class Tokenizer {
             it.nextChar();
         }
         try{
-            return new Token(TokenType.Ident, tempDigit.toString(), startPos, it.currentPos());
+            if (tempDigit.toString().equals("begin")){
+                return new Token(TokenType.Begin, tempDigit.toString(), startPos, it.currentPos());
+            }else if (tempDigit.toString().equals("end")){
+                return new Token(TokenType.End, tempDigit.toString(), startPos, it.currentPos());
+            }else if (tempDigit.toString().equals("var")){
+                return new Token(TokenType.Var, tempDigit.toString(), startPos, it.currentPos());
+            }else if (tempDigit.toString().equals("const")){
+                return new Token(TokenType.Const, tempDigit.toString(), startPos, it.currentPos());
+            }else if (tempDigit.toString().equals("print")){
+                return new Token(TokenType.Print, tempDigit.toString(), startPos, it.currentPos());
+            }else{
+                return new Token(TokenType.Ident, tempDigit.toString(), startPos, it.currentPos());
+            }
         }catch (Exception e){
             throw new TokenizeError(ErrorCode.InvalidInput, startPos);
         }
