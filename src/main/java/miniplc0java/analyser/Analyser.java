@@ -214,7 +214,7 @@ public final class Analyser {
         while (nextIf(TokenType.Const) != null) {
             // 变量名
             var nameToken = expect(TokenType.Ident);
-
+            addSymbol(nameToken.getValueString(), false, true, nameToken.getStartPos());
             // 等于号
             expect(TokenType.Equal);
 
@@ -229,6 +229,7 @@ public final class Analyser {
     private void analyseVariableDeclaration() throws CompileError {
         while (nextIf(TokenType.Var) != null) {
             var nameToken = expect(TokenType.Ident);
+            addSymbol(nameToken.getValueString(), false, false, nameToken.getStartPos());
             expect(TokenType.Equal);
             analyseExpression();
             expect(TokenType.Semicolon);
@@ -254,35 +255,61 @@ public final class Analyser {
     }
 
     private void analyseConstantExpression() throws CompileError {
+        boolean negate = false;
         if(check(TokenType.Plus)) {
-
+            expect(TokenType.Plus);
+            negate = false;
         }else if(check(TokenType.Minus)) {
-
+            expect(TokenType.Minus);
+            negate = true;
+            instructions.add(new Instruction(Operation.LIT, 0));
         }
-        expect(TokenType.Uint);
+        var nameToken = expect(TokenType.Uint);
+        instructions.add(new Instruction(Operation.LIT,
+                (Integer) nameToken.getValue()));
+        if(negate){
+            instructions.add(new Instruction(Operation.SUB));
+        }
     }
 
     private void analyseExpression() throws CompileError {
+        boolean negate;
         analyseTerm();
         while (check(TokenType.Plus) || check(TokenType.Minus)){
             if(check(TokenType.Plus)){
-
+                expect(TokenType.Plus);
+                negate = false;
             }else{
-
+                expect(TokenType.Minus);
+                negate = true;
             }
             analyseTerm();
+            if (negate) {
+                instructions.add(new Instruction(Operation.SUB));
+            }else {
+                instructions.add(new Instruction(Operation.ADD));
+            }
+
         }
     }
 
     private void analyseTerm() throws CompileError {
+        boolean multi;
         analyseFactor();
         while (check(TokenType.Mult) || check(TokenType.Div)){
             if(check(TokenType.Mult)){
-
+                expect(TokenType.Mult);
+                multi = true;
             }else{
-
+                expect(TokenType.Div);
+                multi = false;
             }
             analyseFactor();
+            if (multi){
+                instructions.add(new Instruction(Operation.MUL));
+            }else {
+                instructions.add(new Instruction(Operation.DIV));
+            }
         }
     }
 
